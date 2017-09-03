@@ -1,92 +1,107 @@
 package bst;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 public class Treap {
+
+    private static class TupleTreap {
+        private Treap left, right;
+
+        protected TupleTreap(Treap left, Treap right) {
+            this.left = left;
+            this.right = right;
+        }
+    }
+
     private int key;
     private int priority;
 
     private Treap left;
     private Treap right;
-    private Treap parent;
+    private Treap root;
 
     private static Random rand = new Random(System.currentTimeMillis());
 
-    private Treap(int key, int priority, Treap left, Treap right, Treap parent) {
-        this.key = key;
-        this.priority = priority;
-        this.left = left;
-        this.right = right;
-        this.parent = parent;
+    private static int randInt(int min, int max) {
+        return rand.nextInt((max - min) + 1) + min;
     }
 
-    private static Treap merge(Treap l, Treap r) {
+    public Treap(int key, int priority) {
+        this.key = key;
+        this.priority = priority;
+    }
+
+    public Treap(){}
+
+    private Treap merge(Treap l, Treap r) {
         if (l == null) return r;
         if (r == null) return l;
 
         if (l.priority > r.priority) {
-            Treap newR = merge(l.right, r);
-            return new Treap(l.key, l.priority, l.left, newR, null);
+            l.right = merge(l.right, r);
+            return l;
         } else {
-            Treap newL = merge(l, r.left);
-            return new Treap(r.key, r.priority, newL, r.right, null);
+            r.left = merge(l, r.left);
+            return r;
         }
     }
 
-    private void split(int key, Treap leftTreap, Treap rightTreap) {
-        Treap newTree = null;
-        if (this.key <= key) {
-            if (this.right == null)
-                rightTreap = null;
-            else
-                this.right.split(key, newTree, rightTreap);
-            leftTreap = new Treap(this.key, priority, this.left, newTree, null);
-        } else {
-            if (this.left == null)
-                rightTreap = null;
-            else
-                this.left.split(key, leftTreap, newTree);
-            leftTreap = new Treap(this.key, priority, newTree, this.right, null);
+    private TupleTreap split(int key, Treap treap) {
+        if(treap == null) return new TupleTreap(null,null);
+        if(treap.key < key) {
+            TupleTreap tupleTreap = split(key, treap.right);
+            treap.right = null;
+            return new TupleTreap(merge(treap, tupleTreap.left), tupleTreap.right);
+        }
+        else {
+            TupleTreap tupleTreap = split(key, treap.left);
+            treap.left = null;
+            return new TupleTreap(tupleTreap.left, merge(tupleTreap.right, treap));
         }
     }
 
-    public Treap add(int key) {
-        Treap left = null, right = null;
-        split(key, left, right);
-        Treap m = new Treap(key, rand.nextInt(), null, null, null);
-        return merge(merge(this.left, m), this.right);
+    public void add(int key) {
+        Treap temp = root;
+        while(temp != null && temp.key != key) {
+            if (key < temp.key)
+                temp = temp.left;
+            else
+                temp = temp.right;
+        }
+
+        if (temp == null) {
+            Treap m = new Treap(key, randInt(0, 1000));
+            TupleTreap tupleTreap = split(key, root);
+            root = merge(tupleTreap.left, merge(m, tupleTreap.right));
+        }
     }
 
-    public Treap delete(int key) {
-        Treap l = null, m = null, r = null;
-        split(priority - 1, l, r);
-        r.split(key, m, r);
-        return merge(l, r);
-    }
+//    public Treap delete(int key) {
+//
+//    }
 
-    public static Treap build(int[] keys, int[] priorities) {
-        assert keys.length == priorities.length;
-        Treap last = new Treap(keys[0], priorities[0], null, null, null);
 
+    public Treap build(int[] keys) {
         for (int i = 0; i < keys.length; i++) {
-            if (last.priority > priorities[i]) {
-                last.right = new Treap(keys[i], priorities[i], null, null, last);
-                last = last.right;
-            } else {
-                Treap current = last;
-                while (current.parent != null && current.priority <= priorities[i]) {
-                    current = current.parent;
-                }
-                if(current.priority <= priorities[i])
-                    last = new Treap(keys[i], priorities[i], current, null, last);
-                else {
-                    last = new Treap(keys[i], priorities[i], current.right, null, current);
-                }
+            add(keys[i]);
+        }
+        return root;
+    }
+
+
+    public void printTreap(Treap top) {
+        Queue<Treap> queue = new LinkedList<>();
+        do {
+            System.out.println("Node key: " + top.key + " and node priority: " + top.priority);
+            if(top.left != null) queue.add(top.left);
+            if(top.right != null) queue.add(top.right);
+            if(!queue.isEmpty()) {
+                top = queue.poll();
             }
+            else top = null;
         }
-        while(last.parent != null) {
-            last = last.parent;
-        }
-        return last;
+        while (!queue.isEmpty() || top != null);
     }
 }
