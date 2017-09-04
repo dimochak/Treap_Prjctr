@@ -16,12 +16,12 @@ public class TreapTest {
     @Test
     //condition: all keys in left subtree must be less or equal to all keys in right subtree
     public void testTreap() {
-        treap.printTreap(treap);
+        treap.printTreapWithLevel(treap);
     }
 
     @Test
     public void testTreapDelete() {
         treap.delete(5);
-        treap.printTreap(treap);
+        treap.printTreapWithLevel(treap);
     }
 }
