@@ -20,7 +20,6 @@ import java.util.Random;
  * </ul>
  * 2 main operations that are used are merge 2 treaps into 1 and split a correct treap into 2 by key.
  * It is proved that maximal height of this structure is no more than 4*log(n), where n is a number of keys.
- * However, in this implementation
  */
 public class Treap {
 
@@ -93,7 +92,7 @@ public class Treap {
         }
 
         if (temp == null) {
-            Treap m = new Treap(key, randInt(0, 1000));
+            Treap m = new Treap(key, randInt(0, 1000000));
             TupleTreap tupleTreap = split(key, root);
             root = merge(tupleTreap.left, merge(m, tupleTreap.right));
         }
@@ -142,6 +141,8 @@ public class Treap {
             }
         }
     }
+
+
 
     private static Queue<Treap> swapQueues(Queue<Treap> a, Queue<Treap> b) {
         return a;
