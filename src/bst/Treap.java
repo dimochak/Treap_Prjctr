@@ -78,10 +78,12 @@ public class Treap {
         }
     }
 
-//    public Treap delete(int key) {
-//
-//    }
-
+    public Treap delete(int key) {
+        TupleTreap splittedTreap = split(key, this);
+        TupleTreap anotherTreap = split(key + 1, splittedTreap.right);
+        merge(splittedTreap.left, anotherTreap.right);
+        return anotherTreap.left;
+    }
 
     public Treap build(int[] keys) {
         for (int i = 0; i < keys.length; i++) {
